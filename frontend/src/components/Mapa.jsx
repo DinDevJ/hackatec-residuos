@@ -1,20 +1,50 @@
-import { useContext } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useContext, useState } from "react";
+import Map, { Marker, Popup } from "react-map-gl/mapbox";
 import { DatosContext } from "../context/DatosContext";
 
 export default function Mapa() {
   const { contenedores } = useContext(DatosContext);
+  const [popupInfo, setPopupInfo] = useState(null);
 
   return (
-    <MapContainer center={[19.4, -99.1]} zoom={13} className="h-96 rounded">
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {contenedores.map((c) => (
-        <Marker key={c.id} position={[c.lat, c.lon]}>
-          <Popup>
-            {c.zona} — {c.nivel_llenado}%
+    <div className="h-96 w-full rounded overflow-hidden shadow">
+      <Map
+        initialViewState={{
+          longitude: -101.1872,
+          latitude: 19.7024,
+          zoom: 14
+        }}
+        mapStyle="mapbox://styles/mapbox/streets-v12"
+        mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
+      >
+        {contenedores.map((c) => (
+          <Marker 
+            key={c.id} 
+            longitude={c.lon} 
+            latitude={c.lat} 
+            color={c.nivel_llenado > 80 ? 'red' : c.nivel_llenado > 50 ? 'orange' : 'green'}
+            onClick={e => {
+              e.originalEvent.stopPropagation();
+              setPopupInfo(c);
+            }}
+          />
+        ))}
+
+        {popupInfo && (
+          <Popup
+            anchor="top"
+            longitude={popupInfo.lon}
+            latitude={popupInfo.lat}
+            onClose={() => setPopupInfo(null)}
+          >
+            <div className="p-1">
+              <strong>{popupInfo.zona}</strong>
+              <br />
+              Nivel: {popupInfo.nivel_llenado}%
+            </div>
           </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+        )}
+      </Map>
+    </div>
   );
 }

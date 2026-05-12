@@ -2,5 +2,7 @@ fastapi
 uvicorn[standard]
 python-dotenv
 pandas
+numpy
 google-generativeai
 scikit-learn
+reportlab
