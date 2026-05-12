@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"c:\\\\Users\\\\julio\\\\OneDrive\\\\Desktop\\\\Programacion_proyectos\\\\hackatec-residuos\" && mkdir -p backend/data backend/modelos backend/ia backend/routers frontend/src/api frontend/src/components frontend/src/context frontend/public infra)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\julio\\OneDrive\\Desktop\\Programacion_proyectos\\hackatec-residuos\\backend"
+    ]
+  }
+}
