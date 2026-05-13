@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import contenedores, kpis, asistente
 
-app = FastAPI(title="Hackatec Residuos API")
+app = FastAPI(root_path="/api")
 
 app.add_middleware(
     CORSMiddleware,
