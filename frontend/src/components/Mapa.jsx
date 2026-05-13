@@ -20,9 +20,9 @@ export default function Mapa() {
         {contenedores.map((c) => (
           <Marker 
             key={c.id} 
-            longitude={c.lon} 
+            longitude={c.lng} 
             latitude={c.lat} 
-            color={c.nivel_llenado > 80 ? 'red' : c.nivel_llenado > 50 ? 'orange' : 'green'}
+            color={c.nivel_actual > 80 ? 'red' : c.nivel_actual > 50 ? 'orange' : 'green'}
             onClick={e => {
               e.originalEvent.stopPropagation();
               setPopupInfo(c);
@@ -33,14 +33,14 @@ export default function Mapa() {
         {popupInfo && (
           <Popup
             anchor="top"
-            longitude={popupInfo.lon}
+            longitude={popupInfo.lng}
             latitude={popupInfo.lat}
             onClose={() => setPopupInfo(null)}
           >
             <div className="p-1">
               <strong>{popupInfo.zona}</strong>
               <br />
-              Nivel: {popupInfo.nivel_llenado}%
+              Nivel: {popupInfo.nivel_actual}%
             </div>
           </Popup>
         )}
