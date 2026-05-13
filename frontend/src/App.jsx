@@ -8,18 +8,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // --- MOCK DATA ---
-const chartData = [
-  { time: '06:00', volume: 200, prediction: 250 },
-  { time: '10:00', volume: 450, prediction: 400 },
-  { time: '14:00', volume: 500, prediction: 520 },
-  { time: '18:00', volume: 750, prediction: 700 },
-];
-
-const fleetData = [
-  { id: 'TRK-01', driver: 'Carlos R.', status: 'In Transit', load: 85, route: 'MX City North', selected: false },
-  { id: 'TRK-04', driver: 'Javier M.', status: 'In Transit', load: 75, route: 'Toluca Central', selected: true },
-  { id: 'TRK-07', driver: 'Elena S.', status: 'Maintenance', load: 0, route: 'N/A', selected: false },
-];
+// Mocks removed
 
 // --- COMPONENTS ---
 
@@ -84,7 +73,17 @@ function Sidebar({ currentView, setCurrentView }) {
   );
 }
 
+import { getDashboardSummary } from './api/client';
+
 function DashboardView() {
+  const [data, setData] = React.useState(null);
+
+  React.useEffect(() => {
+    getDashboardSummary().then(res => setData(res.data)).catch(console.error);
+  }, []);
+
+  if (!data) return <div className="flex-1 flex justify-center items-center">Loading...</div>;
+
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-[#FCFAFA]">
       {/* Top Row: KPIs */}
@@ -95,11 +94,11 @@ function DashboardView() {
             <Weight className="text-gray-400 w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900">450</span>
-            <span className="text-sm text-gray-500">/ 800t</span>
+            <span className="text-3xl font-bold text-gray-900">{data.kpis.daily_tonnage.current}</span>
+            <span className="text-sm text-gray-500">/ {data.kpis.daily_tonnage.max}t</span>
           </div>
           <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-[#7B907B] w-[56%] rounded-full"></div>
+            <div className="h-full bg-[#7B907B] rounded-full" style={{ width: `${(data.kpis.daily_tonnage.current / data.kpis.daily_tonnage.max) * 100}%` }}></div>
           </div>
         </div>
 
@@ -109,7 +108,7 @@ function DashboardView() {
             <Fuel className="text-gray-400 w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-[#7B907B]">+20%</span>
+            <span className="text-3xl font-bold text-[#7B907B]">+{data.kpis.diesel_efficiency_saved_pct}%</span>
             <span className="text-sm text-gray-500">Saved</span>
           </div>
           <p className="text-xs text-gray-400 mt-4">Compared to last 30 days</p>
@@ -121,23 +120,23 @@ function DashboardView() {
             <Truck className="text-gray-400 w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900">12</span>
-            <span className="text-sm text-gray-500">/ 14 Trucks</span>
+            <span className="text-3xl font-bold text-gray-900">{data.kpis.active_fleet.active}</span>
+            <span className="text-sm text-gray-500">/ {data.kpis.active_fleet.total} Trucks</span>
           </div>
           <div className="mt-4 flex space-x-1">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className={`h-2 flex-1 rounded-full ${i < 3 ? 'bg-[#7B907B]' : 'bg-gray-100'}`}></div>
+              <div key={i} className={`h-2 flex-1 rounded-full ${i < Math.round((data.kpis.active_fleet.active / data.kpis.active_fleet.total) * 4) ? 'bg-[#7B907B]' : 'bg-gray-100'}`}></div>
             ))}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-50">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-sm font-medium text-gray-500">Colonias Limpiadas Hoy</h3>
+            <h3 className="text-sm font-medium text-gray-500">Zonas Limpiadas Hoy</h3>
             <CheckCircle2 className="text-[#7B907B] w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900">24</span>
+            <span className="text-3xl font-bold text-gray-900">{data.kpis.zonas_limpiadas}</span>
             <span className="text-sm text-gray-500">Zonas</span>
           </div>
           <p className="text-xs text-gray-400 mt-4">AI sensors report new zones</p>
@@ -150,7 +149,7 @@ function DashboardView() {
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Collection Volume vs Predictive AI Model</h3>
           <div className="flex-1 min-h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={data.chart_data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7B907B" stopOpacity={0.3} />
@@ -165,8 +164,8 @@ function DashboardView() {
                 <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="volume" stroke="#7B907B" strokeWidth={3} fillOpacity={1} fill="url(#colorVolume)" />
-                <Area type="monotone" dataKey="prediction" stroke="#E07A5F" strokeWidth={3} fillOpacity={1} fill="url(#colorPred)" />
+                <Area type="monotone" dataKey="real_volume" stroke="#7B907B" strokeWidth={3} fillOpacity={1} fill="url(#colorVolume)" />
+                <Area type="monotone" dataKey="ai_prediction" stroke="#E07A5F" strokeWidth={3} fillOpacity={1} fill="url(#colorPred)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -179,27 +178,15 @@ function DashboardView() {
           </div>
 
           <div className="space-y-6 flex-1">
-            <div className="flex space-x-3">
-              <div className="w-2 h-2 mt-2 rounded-full bg-[#E07A5F]"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Traffic buildup in Zone B</p>
-                <p className="text-xs text-gray-500 mt-1">Rerouting Truck 04 saves 15m.</p>
+            {data.alerts.map((alert, idx) => (
+              <div key={idx} className="flex space-x-3">
+                <div className={`w-2 h-2 mt-2 rounded-full ${alert.type === 'traffic' ? 'bg-[#E07A5F]' : alert.type === 'capacity' ? 'bg-[#7B907B]' : 'bg-gray-400'}`}></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{alert.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">{alert.description}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex space-x-3">
-              <div className="w-2 h-2 mt-2 rounded-full bg-[#7B907B]"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Optimal load capacity reached</p>
-                <p className="text-xs text-gray-500 mt-1">Truck 08 ready for depot return.</p>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <div className="w-2 h-2 mt-2 rounded-full bg-gray-400"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Maintenance Pre-warning</p>
-                <p className="text-xs text-gray-500 mt-1">Check brake pads on Truck 02.</p>
-              </div>
-            </div>
+            ))}
           </div>
 
           <button className="w-full mt-6 bg-[#7B907B] hover:bg-[#6a7d6a] text-white py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors">
@@ -227,24 +214,25 @@ function DashboardView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              <tr className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">TRK-004</td>
-                <td className="px-6 py-4 text-gray-500">Maria Garcia</td>
-                <td className="px-6 py-4 text-gray-500">North District</td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#7B907B]/10 text-[#7B907B]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#7B907B] mr-1.5"></span>
-                    On Schedule
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="inline-flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                    <FileText className="w-4 h-4" />
-                    <span>Export PDF</span>
-                  </button>
-                </td>
-              </tr>
-              {/* Additional rows omitted for brevity */}
+              {data.active_routes.map((route, idx) => (
+                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">{route.truck_id}</td>
+                  <td className="px-6 py-4 text-gray-500">{route.driver}</td>
+                  <td className="px-6 py-4 text-gray-500">{route.current_zone}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${route.status === 'Delayed' ? 'bg-[#E07A5F]/10 text-[#E07A5F]' : 'bg-[#7B907B]/10 text-[#7B907B]'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${route.status === 'Delayed' ? 'bg-[#E07A5F]' : 'bg-[#7B907B]'}`}></span>
+                      {route.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button className="inline-flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+                      <FileText className="w-4 h-4" />
+                      <span>Export PDF</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -253,7 +241,27 @@ function DashboardView() {
   );
 }
 
+import { getFleetStatus } from './api/client';
+
 function FleetManagerView() {
+  const [fleetData, setFleetData] = React.useState([]);
+  const [selectedTruck, setSelectedTruck] = React.useState(null);
+
+  React.useEffect(() => {
+    getFleetStatus()
+      .then(res => {
+        setFleetData(res.data);
+        if (res.data.length > 0) setSelectedTruck(res.data[0]);
+      })
+      .catch(console.error);
+  }, []);
+
+  if (!selectedTruck) return <div className="flex-1 flex justify-center items-center">Loading Fleet Data...</div>;
+
+  const activeVehicles = fleetData.filter(t => t.status !== 'Maintenance').length;
+  const driversOnShift = activeVehicles; // simplify
+  const totalLoad = fleetData.reduce((acc, t) => acc + t.load_pct, 0) / (fleetData.length || 1);
+
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-[#FCFAFA]">
       {/* Header Area */}
@@ -276,8 +284,8 @@ function FleetManagerView() {
             <h3 className="text-sm font-medium text-gray-500">Active Vehicles</h3>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-4xl font-bold text-gray-900">12</span>
-            <span className="text-sm font-semibold text-gray-400">/ 14</span>
+            <span className="text-4xl font-bold text-gray-900">{activeVehicles}</span>
+            <span className="text-sm font-semibold text-gray-400">/ {fleetData.length}</span>
           </div>
         </div>
 
@@ -287,7 +295,7 @@ function FleetManagerView() {
             <h3 className="text-sm font-medium text-gray-500">Drivers on Shift</h3>
           </div>
           <div className="flex items-baseline">
-            <span className="text-4xl font-bold text-gray-900">12</span>
+            <span className="text-4xl font-bold text-gray-900">{driversOnShift}</span>
           </div>
         </div>
 
@@ -308,7 +316,7 @@ function FleetManagerView() {
             <h3 className="text-sm font-medium text-gray-500">Fleet Capacity</h3>
           </div>
           <div className="flex items-baseline space-x-1">
-            <span className="text-4xl font-bold text-gray-900">82</span>
+            <span className="text-4xl font-bold text-gray-900">{Math.round(totalLoad)}</span>
             <span className="text-lg font-semibold text-gray-500">%</span>
           </div>
         </div>
@@ -320,22 +328,25 @@ function FleetManagerView() {
         <div className="w-[60%] flex flex-col">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 px-2">Live Unit Status</h3>
           <div className="flex-1 overflow-y-auto space-y-3 px-2 pb-4">
-            {fleetData.map((truck) => (
+            {fleetData.map((truck) => {
+              const isSelected = selectedTruck.unit_id === truck.unit_id;
+              return (
               <div
-                key={truck.id}
-                className={`p-4 rounded-3xl flex items-center justify-between cursor-pointer transition-all border ${truck.selected
+                key={truck.unit_id}
+                onClick={() => setSelectedTruck(truck)}
+                className={`p-4 rounded-3xl flex items-center justify-between cursor-pointer transition-all border ${isSelected
                   ? 'bg-white border-[#7B907B]/30 shadow-sm ring-1 ring-[#7B907B]/10'
                   : 'bg-[#F9F3F2] border-transparent hover:bg-white hover:shadow-sm'
                   }`}
               >
                 {/* Icon + Info */}
                 <div className="flex items-center space-x-4 min-w-[150px]">
-                  <div className={`p-3 rounded-2xl ${truck.selected ? 'bg-[#7B907B]' : 'bg-gray-200'}`}>
-                    <Truck className={`w-5 h-5 ${truck.selected ? 'text-white' : 'text-gray-500'}`} />
+                  <div className={`p-3 rounded-2xl ${isSelected ? 'bg-[#7B907B]' : 'bg-gray-200'}`}>
+                    <Truck className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900">{truck.id}</p>
-                    <p className="text-xs text-gray-500 font-medium">{truck.driver}</p>
+                    <p className="font-bold text-gray-900">{truck.unit_id}</p>
+                    <p className="text-xs text-gray-500 font-medium">{truck.driver_name}</p>
                   </div>
                 </div>
 
@@ -343,7 +354,7 @@ function FleetManagerView() {
                 <div className="w-28 flex justify-center">
                   <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${truck.status === 'In Transit'
                     ? 'bg-gray-200/50 text-gray-600'
-                    : 'bg-[#E07A5F]/10 text-[#E07A5F]'
+                    : truck.status === 'Maintenance' ? 'bg-[#E07A5F]/10 text-[#E07A5F]' : 'bg-[#7B907B]/10 text-[#7B907B]'
                     }`}>
                     {truck.status}
                   </span>
@@ -353,12 +364,12 @@ function FleetManagerView() {
                 <div className="w-32 flex flex-col space-y-1.5">
                   <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase">
                     <span>Load</span>
-                    <span>{truck.load}%</span>
+                    <span>{truck.load_pct}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${truck.load > 80 ? 'bg-[#7B907B]' : 'bg-gray-400'}`}
-                      style={{ width: `${truck.load}%` }}
+                      className={`h-full rounded-full ${truck.load_pct > 80 ? 'bg-[#E07A5F]' : truck.load_pct > 0 ? 'bg-[#7B907B]' : 'bg-gray-400'}`}
+                      style={{ width: `${truck.load_pct}%` }}
                     ></div>
                   </div>
                 </div>
@@ -366,11 +377,11 @@ function FleetManagerView() {
                 {/* Route */}
                 <div className="w-32 text-right">
                   <p className="text-xs font-semibold text-gray-700 truncate">
-                    {truck.route !== 'N/A' ? `Route: ${truck.route}` : 'N/A'}
+                    {truck.current_zone !== 'N/A' ? `Zone: ${truck.current_zone}` : 'N/A'}
                   </p>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
@@ -378,7 +389,7 @@ function FleetManagerView() {
         <div className="w-[40%] bg-[#F9F3F2] rounded-3xl p-6 flex flex-col border border-gray-100 shadow-sm relative overflow-hidden">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Unit TRK-04</h3>
+            <h3 className="text-xl font-bold text-gray-900">Unit {selectedTruck.unit_id}</h3>
             <button className="text-gray-400 hover:text-gray-600">
               <Info className="w-5 h-5" />
             </button>
@@ -386,12 +397,12 @@ function FleetManagerView() {
 
           {/* Driver Card */}
           <div className="bg-white rounded-2xl p-4 flex items-center space-x-4 mb-8 shadow-sm">
-            <img src="https://i.pravatar.cc/150?img=33" alt="Driver Javier" className="w-12 h-12 rounded-full border-2 border-gray-50" />
+            <img src={`https://ui-avatars.com/api/?name=${selectedTruck.driver_name}&background=random`} alt="Driver" className="w-12 h-12 rounded-full border-2 border-gray-50" />
             <div>
-              <p className="font-bold text-gray-900">Javier M.</p>
+              <p className="font-bold text-gray-900">{selectedTruck.driver_name}</p>
               <div className="flex items-center space-x-1 mt-0.5">
                 <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
-                <span className="text-xs font-semibold text-gray-500">4.9 Rating</span>
+                <span className="text-xs font-semibold text-gray-500">{selectedTruck.telemetry.driver_rating} Rating</span>
               </div>
             </div>
           </div>
@@ -402,19 +413,19 @@ function FleetManagerView() {
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
                 <span className="text-sm text-gray-600 font-medium">Fuel Efficiency</span>
-                <span className="text-sm font-bold text-gray-900">2.1 km/L</span>
+                <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry.fuel_efficiency}</span>
               </div>
               <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
                 <span className="text-sm text-gray-600 font-medium">Current Speed</span>
-                <span className="text-sm font-bold text-gray-900">78 km/h</span>
+                <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry.current_speed}</span>
               </div>
               <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
                 <span className="text-sm text-gray-600 font-medium">Engine Temp</span>
-                <span className="text-sm font-bold text-gray-900">92°C</span>
+                <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry.engine_temp}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 font-medium">ETA Destination</span>
-                <span className="text-sm font-bold text-gray-900">14:30 CST</span>
+                <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry.eta}</span>
               </div>
             </div>
           </div>
@@ -436,7 +447,19 @@ function FleetManagerView() {
   );
 }
 
+import { getActiveRoutes } from './api/client';
+
 function AIRoutingView() {
+  const [routes, setRoutes] = React.useState([]);
+
+  React.useEffect(() => {
+    getActiveRoutes()
+      .then(res => setRoutes(res.data))
+      .catch(console.error);
+  }, []);
+
+  if (!routes.length) return <div className="flex-1 flex justify-center items-center">Loading Routes...</div>;
+
   return (
     <div className="flex-1 flex overflow-hidden bg-[#FCFAFA]">
       {/* Center Workspace */}
@@ -455,14 +478,14 @@ function AIRoutingView() {
             <div>
               <label className="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Fleet Sector</label>
               <button className="bg-white border border-gray-200 hover:border-gray-300 shadow-sm rounded-xl px-4 py-2 flex items-center space-x-3 transition-colors">
-                <span className="text-sm font-medium text-gray-900">Zone Norte</span>
+                <span className="text-sm font-medium text-gray-900">All Zones</span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </button>
             </div>
             <div>
               <label className="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Date</label>
               <button className="bg-white border border-gray-200 hover:border-gray-300 shadow-sm rounded-xl px-4 py-2 flex items-center space-x-3 transition-colors">
-                <span className="text-sm font-medium text-gray-900">27/10/2023</span>
+                <span className="text-sm font-medium text-gray-900">Today</span>
                 <Calendar className="w-4 h-4 text-gray-400" />
               </button>
             </div>
@@ -475,102 +498,70 @@ function AIRoutingView() {
 
         {/* Route Cards */}
         <div className="flex flex-wrap gap-6">
-          {/* Card 1: Route Alpha */}
-          <div className="w-[340px] bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col relative overflow-hidden">
-            {/* Highlight Banner */}
-            <div className="absolute top-0 left-0 right-0 bg-[#eef3ee] text-[#7B907B] text-[11px] font-bold px-5 py-2 flex items-center space-x-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Updated by AI Copilot</span>
-            </div>
-
-            <div className="mt-8 flex justify-between items-start mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="bg-[#FCFAFA] p-3 rounded-2xl">
-                  <Truck className="w-6 h-6 text-gray-700" />
+          {routes.map((route, idx) => (
+            <div key={idx} className="w-[340px] bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col relative overflow-hidden">
+              {/* Highlight Banner */}
+              {route.efficiency_saved !== "Standard" && (
+                <div className="absolute top-0 left-0 right-0 bg-[#eef3ee] text-[#7B907B] text-[11px] font-bold px-5 py-2 flex items-center space-x-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Optimized by AI Copilot</span>
                 </div>
-                <div>
-                  <h4 className="font-bold text-lg text-gray-900">Route Alpha</h4>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Zone Norte • Truck 402</p>
+              )}
+
+              <div className={`mt-${route.efficiency_saved !== "Standard" ? '8' : '0'} flex justify-between items-start mb-6`}>
+                <div className="flex items-center space-x-4">
+                  <div className="bg-[#FCFAFA] p-3 rounded-2xl">
+                    <Truck className="w-6 h-6 text-gray-700" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg text-gray-900">{route.name}</h4>
+                    <p className="text-xs text-gray-500 font-medium mt-0.5">{route.zone} • {route.truck}</p>
+                  </div>
                 </div>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${route.status === 'In Progress' ? 'bg-[#7B907B]/10 text-[#7B907B]' : route.status === 'Pending' ? 'bg-gray-100 text-gray-600' : 'bg-[#E07A5F]/10 text-[#E07A5F]'}`}>
+                  {route.status}
+                </span>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">In Progress</span>
-            </div>
 
-            {/* Metrics */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-[#FCFAFA] p-4 rounded-2xl">
-                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Est. Time</p>
-                <p className="text-xl font-bold text-gray-900">4h 15m</p>
-              </div>
-              <div className="bg-[#eef3ee] p-4 rounded-2xl border border-[#7B907B]/10">
-                <p className="text-[11px] text-[#7B907B] font-bold uppercase tracking-wider mb-1">Efficiency</p>
-                <p className="text-xl font-bold text-[#7B907B] flex items-center space-x-1">
-                  <span>12L</span>
-                </p>
-                <p className="text-[10px] text-[#7B907B] font-bold flex items-center mt-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Diesel Saved
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <div className="flex justify-between text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">
-                <span>Containers</span>
-                <span>45 / 50 Cap.</span>
-              </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-[#7B907B] rounded-full" style={{ width: '90%' }}></div>
-              </div>
-            </div>
-
-            <button className="w-full mt-auto py-3.5 bg-[#F9F3F2] hover:bg-[#f0e6e4] text-gray-800 font-bold rounded-xl flex justify-center items-center space-x-2 transition-colors">
-              <FileText className="w-4 h-4" />
-              <span>Export PDF Route Sheet</span>
-            </button>
-          </div>
-
-          {/* Card 2: Route Beta */}
-          <div className="w-[340px] bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="bg-[#FCFAFA] p-3 rounded-2xl">
-                  <Truck className="w-6 h-6 text-gray-700" />
+              {/* Metrics */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-[#FCFAFA] p-4 rounded-2xl">
+                  <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Est. Time</p>
+                  <p className="text-xl font-bold text-gray-900">{route.est_time}</p>
                 </div>
-                <div>
-                  <h4 className="font-bold text-lg text-gray-900">Route Beta</h4>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Zone Norte • Truck 415</p>
+                <div className={`${route.efficiency_saved !== "Standard" ? 'bg-[#eef3ee] border border-[#7B907B]/10' : 'bg-[#FCFAFA]'} p-4 rounded-2xl`}>
+                  <p className={`text-[11px] ${route.efficiency_saved !== "Standard" ? 'text-[#7B907B]' : 'text-gray-500'} font-bold uppercase tracking-wider mb-1`}>Efficiency</p>
+                  {route.efficiency_saved !== "Standard" ? (
+                    <>
+                      <p className="text-xl font-bold text-[#7B907B] flex items-center space-x-1">
+                        <span>{route.efficiency_saved.split(' ')[0]}</span>
+                      </p>
+                      <p className="text-[10px] text-[#7B907B] font-bold flex items-center mt-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Diesel Saved
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm font-bold text-gray-700 mt-1">Standard</p>
+                  )}
                 </div>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">Pending</span>
-            </div>
 
-            {/* Metrics */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-[#FCFAFA] p-4 rounded-2xl">
-                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Est. Time</p>
-                <p className="text-xl font-bold text-gray-900">5h 30m</p>
+              <div className="mb-8">
+                <div className="flex justify-between text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">
+                  <span>Containers</span>
+                  <span>{route.containers_current} / {route.containers_max} Cap.</span>
+                </div>
+                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div className={`h-full ${route.containers_current / route.containers_max > 0.8 ? 'bg-[#E07A5F]' : 'bg-[#7B907B]'} rounded-full`} style={{ width: `${(route.containers_current / route.containers_max) * 100}%` }}></div>
+                </div>
               </div>
-              <div className="bg-[#FCFAFA] p-4 rounded-2xl">
-                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Efficiency</p>
-                <p className="text-sm font-bold text-gray-700 mt-1">Standard</p>
-              </div>
-            </div>
 
-            <div className="mb-8">
-              <div className="flex justify-between text-[11px] font-bold text-gray-500 mb-2 uppercase tracking-wider">
-                <span>Containers</span>
-                <span>20 / 50 Cap.</span>
-              </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gray-400 rounded-full" style={{ width: '40%' }}></div>
-              </div>
+              <button className="w-full mt-auto py-3.5 bg-[#F9F3F2] hover:bg-[#f0e6e4] text-gray-800 font-bold rounded-xl flex justify-center items-center space-x-2 transition-colors">
+                <FileText className="w-4 h-4" />
+                <span>Export PDF Route Sheet</span>
+              </button>
             </div>
-
-            <button className="w-full mt-auto py-3.5 bg-[#F9F3F2] hover:bg-[#f0e6e4] text-gray-800 font-bold rounded-xl flex justify-center items-center space-x-2 transition-colors">
-              <FileText className="w-4 h-4" />
-              <span>Export PDF Route Sheet</span>
-            </button>
-          </div>
+          ))}
         </div>
       </div>
 
