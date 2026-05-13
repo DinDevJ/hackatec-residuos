@@ -14,7 +14,7 @@ sudo systemctl restart fastapi.service
 # 3. Actualizar Frontend
 echo "-> Actualizando Frontend..."
 cd frontend
-npm install
+npm install --legacy-peer-deps
 npm run build
 # Mover los archivos nuevos a la carpeta de Nginx
 sudo rm -rf /var/www/hackatec/*
