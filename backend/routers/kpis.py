@@ -10,6 +10,6 @@ def kpis():
     df = pd.read_csv(CSV_PATH)
     return {
         "total_contenedores": len(df),
-        "promedio_llenado": round(df["nivel_llenado"].mean(), 1),
-        "criticos": int((df["nivel_llenado"] >= 80).sum()),
+        "promedio_llenado": round(df["nivel_actual"].mean(), 1),
+        "criticos": int((df["nivel_actual"] >= 80).sum()),
     }

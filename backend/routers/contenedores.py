@@ -12,7 +12,7 @@ def listar():
 
 
 @router.get("/{contenedor_id}")
-def detalle(contenedor_id: int):
+def detalle(contenedor_id: str):
     df = pd.read_csv(CSV_PATH)
     row = df[df["id"] == contenedor_id]
     if row.empty:
