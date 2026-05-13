@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, Truck, Users, Flame, BarChart3, Info, Star, MessageSquare, MapPin } from 'lucide-react';
-
-const fleetData = [
-  { id: 'CAM-01', driver: 'Carlos R.', status: 'En Tránsito', load: 85, route: 'CDMX Norte', selected: false },
-  { id: 'CAM-04', driver: 'Javier M.', status: 'En Tránsito', load: 75, route: 'Toluca Centro', selected: true },
-  { id: 'CAM-07', driver: 'Elena S.', status: 'Mantenimiento', load: 0, route: 'N/A', selected: false },
-];
+import { getFleetStatus } from '../api/client';
 
 export default function FleetManagerView() {
+  const [fleetData, setFleetData] = useState([]);
+  const [selectedTruckId, setSelectedTruckId] = useState(null);
+
+  useEffect(() => {
+    getFleetStatus().then(res => {
+      setFleetData(res.data);
+      if (res.data.length > 0) setSelectedTruckId(res.data[0].unit_id);
+    }).catch(console.error);
+  }, []);
+
+  const selectedTruck = useMemo(() => fleetData.find(t => t.unit_id === selectedTruckId), [fleetData, selectedTruckId]);
+
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-[#FCFAFA]">
       {/* Header Area */}
@@ -76,28 +83,29 @@ export default function FleetManagerView() {
           <div className="flex-1 overflow-y-auto space-y-3 px-2 pb-4">
             {fleetData.map((truck) => (
               <div
-                key={truck.id}
-                className={`p-4 rounded-3xl flex items-center justify-between cursor-pointer transition-all border ${truck.selected
+                key={truck.unit_id}
+                onClick={() => setSelectedTruckId(truck.unit_id)}
+                className={`p-4 rounded-3xl flex items-center justify-between cursor-pointer transition-all border ${selectedTruckId === truck.unit_id
                   ? 'bg-white border-[#7B907B]/30 shadow-sm ring-1 ring-[#7B907B]/10'
                   : 'bg-[#F9F3F2] border-transparent hover:bg-white hover:shadow-sm'
                   }`}
               >
                 {/* Icon + Info */}
                 <div className="flex items-center space-x-4 min-w-[150px]">
-                  <div className={`p-3 rounded-2xl ${truck.selected ? 'bg-[#7B907B]' : 'bg-gray-200'}`}>
-                    <Truck className={`w-5 h-5 ${truck.selected ? 'text-white' : 'text-gray-500'}`} />
+                  <div className={`p-3 rounded-2xl ${selectedTruckId === truck.unit_id ? 'bg-[#7B907B]' : 'bg-gray-200'}`}>
+                    <Truck className={`w-5 h-5 ${selectedTruckId === truck.unit_id ? 'text-white' : 'text-gray-500'}`} />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900">{truck.id}</p>
-                    <p className="text-xs text-gray-500 font-medium">{truck.driver}</p>
+                    <p className="font-bold text-gray-900">{truck.unit_id}</p>
+                    <p className="text-xs text-gray-500 font-medium">{truck.driver_name}</p>
                   </div>
                 </div>
 
                 {/* Status Badge */}
                 <div className="w-28 flex justify-center">
-                  <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${truck.status === 'En Tránsito'
+                  <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${truck.status === 'In Transit'
                     ? 'bg-gray-200/50 text-gray-600'
-                    : 'bg-[#E07A5F]/10 text-[#E07A5F]'
+                    : truck.status === 'Delayed' ? 'bg-[#E07A5F]/10 text-[#E07A5F]' : 'bg-[#7B907B]/10 text-[#7B907B]'
                     }`}>
                     {truck.status}
                   </span>
@@ -107,12 +115,12 @@ export default function FleetManagerView() {
                 <div className="w-32 flex flex-col space-y-1.5">
                   <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase">
                     <span>Carga</span>
-                    <span>{truck.load}%</span>
+                    <span>{truck.load_pct}%</span>
                   </div>
                   <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${truck.load > 80 ? 'bg-[#7B907B]' : 'bg-gray-400'}`}
-                      style={{ width: `${truck.load}%` }}
+                      className={`h-full rounded-full ${truck.load_pct > 80 ? 'bg-[#7B907B]' : 'bg-gray-400'}`}
+                      style={{ width: `${truck.load_pct}%` }}
                     ></div>
                   </div>
                 </div>
@@ -120,7 +128,7 @@ export default function FleetManagerView() {
                 {/* Route */}
                 <div className="w-32 text-right">
                   <p className="text-xs font-semibold text-gray-700 truncate">
-                    {truck.route !== 'N/A' ? `Ruta: ${truck.route}` : 'N/A'}
+                    {truck.current_zone !== 'N/A' ? `Zona: ${truck.current_zone}` : 'N/A'}
                   </p>
                 </div>
               </div>
@@ -130,48 +138,52 @@ export default function FleetManagerView() {
 
         {/* Right: Truck Detail Panel (40%) */}
         <div className="w-[40%] bg-[#F9F3F2] rounded-3xl p-6 flex flex-col border border-gray-100 shadow-sm relative overflow-hidden">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Unidad CAM-04</h3>
-            <button className="text-gray-400 hover:text-gray-600">
-              <Info className="w-5 h-5" />
-            </button>
-          </div>
+          {selectedTruck && (
+            <>
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Unidad {selectedTruck.unit_id}</h3>
+                <button className="text-gray-400 hover:text-gray-600">
+                  <Info className="w-5 h-5" />
+                </button>
+              </div>
 
-          {/* Driver Card */}
-          <div className="bg-white rounded-2xl p-4 flex items-center space-x-4 mb-8 shadow-sm">
-            <img src="https://i.pravatar.cc/150?img=33" alt="Conductor Javier" className="w-12 h-12 rounded-full border-2 border-gray-50" />
-            <div>
-              <p className="font-bold text-gray-900">Javier M.</p>
-              <div className="flex items-center space-x-1 mt-0.5">
-                <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
-                <span className="text-xs font-semibold text-gray-500">Calificación 4.9</span>
+              {/* Driver Card */}
+              <div className="bg-white rounded-2xl p-4 flex items-center space-x-4 mb-8 shadow-sm">
+                <img src={`https://i.pravatar.cc/150?u=${selectedTruck.driver_name}`} alt="Conductor" className="w-12 h-12 rounded-full border-2 border-gray-50" />
+                <div>
+                  <p className="font-bold text-gray-900">{selectedTruck.driver_name}</p>
+                  <div className="flex items-center space-x-1 mt-0.5">
+                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
+                    <span className="text-xs font-semibold text-gray-500">Calificación {selectedTruck.telemetry?.driver_rating || '4.5'}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Live Telemetry */}
-          <div className="flex-1">
-            <h4 className="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wider">Telemetría en Vivo</h4>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600 font-medium">Eficiencia Combustible</span>
-                <span className="text-sm font-bold text-gray-900">2.1 km/L</span>
+              {/* Live Telemetry */}
+              <div className="flex-1">
+                <h4 className="text-sm font-bold text-gray-500 mb-4 uppercase tracking-wider">Telemetría en Vivo</h4>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
+                    <span className="text-sm text-gray-600 font-medium">Eficiencia Combustible</span>
+                    <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry?.fuel_efficiency || '--'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
+                    <span className="text-sm text-gray-600 font-medium">Velocidad Actual</span>
+                    <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry?.current_speed || '--'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
+                    <span className="text-sm text-gray-600 font-medium">Temp. del Motor</span>
+                    <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry?.engine_temp || '--'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 font-medium">Llegada Estimada</span>
+                    <span className="text-sm font-bold text-gray-900">{selectedTruck.telemetry?.eta || '--'}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600 font-medium">Velocidad Actual</span>
-                <span className="text-sm font-bold text-gray-900">78 km/h</span>
-              </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200/50">
-                <span className="text-sm text-gray-600 font-medium">Temp. del Motor</span>
-                <span className="text-sm font-bold text-gray-900">92°C</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 font-medium">Llegada Estimada</span>
-                <span className="text-sm font-bold text-gray-900">14:30 CST</span>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
 
           {/* Action Buttons */}
           <div className="mt-8 space-y-3">

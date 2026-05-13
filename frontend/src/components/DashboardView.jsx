@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Weight, Fuel, Truck, CheckCircle2, Brain, Activity, FileText } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const chartData = [
-  { time: '06:00', volume: 200, prediction: 250 },
-  { time: '10:00', volume: 450, prediction: 400 },
-  { time: '14:00', volume: 500, prediction: 520 },
-  { time: '18:00', volume: 750, prediction: 700 },
-];
+import { getDashboardSummary } from '../api/client';
 
 export default function DashboardView() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    getDashboardSummary().then(res => setData(res.data)).catch(console.error);
+  }, []);
+
+  if (!data) return <div className="flex-1 flex justify-center items-center">Cargando...</div>;
+
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-[#FCFAFA]">
       {/* Top Row: KPIs */}
@@ -20,11 +22,11 @@ export default function DashboardView() {
             <Weight className="text-gray-400 w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900">450</span>
-            <span className="text-sm text-gray-500">/ 800t</span>
+            <span className="text-3xl font-bold text-gray-900">{data.kpis.daily_tonnage.current}</span>
+            <span className="text-sm text-gray-500">/ {data.kpis.daily_tonnage.max}t</span>
           </div>
           <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-[#7B907B] w-[56%] rounded-full"></div>
+            <div className="h-full bg-[#7B907B] rounded-full" style={{ width: `${(data.kpis.daily_tonnage.current / data.kpis.daily_tonnage.max) * 100}%` }}></div>
           </div>
         </div>
 
@@ -34,7 +36,7 @@ export default function DashboardView() {
             <Fuel className="text-gray-400 w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-[#7B907B]">+20%</span>
+            <span className="text-3xl font-bold text-[#7B907B]">+{data.kpis.diesel_efficiency_saved_pct}%</span>
             <span className="text-sm text-gray-500">Ahorrado</span>
           </div>
           <p className="text-xs text-gray-400 mt-4">Comparado con los últimos 30 días</p>
@@ -46,8 +48,8 @@ export default function DashboardView() {
             <Truck className="text-gray-400 w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900">12</span>
-            <span className="text-sm text-gray-500">/ 14 Camiones</span>
+            <span className="text-3xl font-bold text-gray-900">{data.kpis.active_fleet.active}</span>
+            <span className="text-sm text-gray-500">/ {data.kpis.active_fleet.total} Camiones</span>
           </div>
           <div className="mt-4 flex space-x-1">
             {[...Array(4)].map((_, i) => (
@@ -62,7 +64,7 @@ export default function DashboardView() {
             <CheckCircle2 className="text-[#7B907B] w-5 h-5" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900">24</span>
+            <span className="text-3xl font-bold text-gray-900">{data.kpis.zonas_limpiadas}</span>
             <span className="text-sm text-gray-500">Zonas</span>
           </div>
           <p className="text-xs text-gray-400 mt-4">Sensores de IA reportan nuevas zonas</p>
@@ -75,7 +77,7 @@ export default function DashboardView() {
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Volumen de Recolección vs Modelo Predictivo de IA</h3>
           <div className="flex-1 min-h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={data.chart_data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#7B907B" stopOpacity={0.3} />
@@ -90,8 +92,8 @@ export default function DashboardView() {
                 <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9ca3af' }} />
                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="volume" stroke="#7B907B" strokeWidth={3} fillOpacity={1} fill="url(#colorVolume)" />
-                <Area type="monotone" dataKey="prediction" stroke="#E07A5F" strokeWidth={3} fillOpacity={1} fill="url(#colorPred)" />
+                <Area type="monotone" dataKey="real_volume" stroke="#7B907B" strokeWidth={3} fillOpacity={1} fill="url(#colorVolume)" />
+                <Area type="monotone" dataKey="ai_prediction" stroke="#E07A5F" strokeWidth={3} fillOpacity={1} fill="url(#colorPred)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -103,28 +105,16 @@ export default function DashboardView() {
             <h3 className="text-lg font-semibold text-gray-900">Alertas del Eco-Cerebro</h3>
           </div>
 
-          <div className="space-y-6 flex-1">
-            <div className="flex space-x-3">
-              <div className="w-2 h-2 mt-2 rounded-full bg-[#E07A5F]"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Acumulación de tráfico en la Zona B</p>
-                <p className="text-xs text-gray-500 mt-1">Redirigir el Camión 04 ahorra 15 min.</p>
+          <div className="space-y-6 flex-1 overflow-y-auto max-h-[300px]">
+            {data.alerts.map((alert, idx) => (
+              <div key={idx} className="flex space-x-3">
+                <div className={`w-2 h-2 mt-2 rounded-full ${alert.type === 'traffic' ? 'bg-[#E07A5F]' : alert.type === 'capacity' ? 'bg-[#7B907B]' : 'bg-gray-400'}`}></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{alert.title}</p>
+                  <p className="text-xs text-gray-500 mt-1">{alert.description}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex space-x-3">
-              <div className="w-2 h-2 mt-2 rounded-full bg-[#7B907B]"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Capacidad de carga óptima alcanzada</p>
-                <p className="text-xs text-gray-500 mt-1">Camión 08 listo para regresar al depósito.</p>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <div className="w-2 h-2 mt-2 rounded-full bg-gray-400"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Aviso Previo de Mantenimiento</p>
-                <p className="text-xs text-gray-500 mt-1">Revisar pastillas de freno en el Camión 02.</p>
-              </div>
-            </div>
+            ))}
           </div>
 
           <button className="w-full mt-6 bg-[#7B907B] hover:bg-[#6a7d6a] text-white py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors">
@@ -152,23 +142,25 @@ export default function DashboardView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              <tr className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-900">CAM-004</td>
-                <td className="px-6 py-4 text-gray-500">Maria Garcia</td>
-                <td className="px-6 py-4 text-gray-500">Distrito Norte</td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#7B907B]/10 text-[#7B907B]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#7B907B] mr-1.5"></span>
-                    En Tiempo
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="inline-flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                    <FileText className="w-4 h-4" />
-                    <span>Exportar PDF</span>
-                  </button>
-                </td>
-              </tr>
+              {data.active_routes.map((route, idx) => (
+                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">{route.truck_id}</td>
+                  <td className="px-6 py-4 text-gray-500">{route.driver}</td>
+                  <td className="px-6 py-4 text-gray-500">{route.current_zone}</td>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${route.status === 'On Schedule' ? 'bg-[#7B907B]/10 text-[#7B907B]' : route.status === 'Delayed' ? 'bg-[#E07A5F]/10 text-[#E07A5F]' : 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${route.status === 'On Schedule' ? 'bg-[#7B907B]' : route.status === 'Delayed' ? 'bg-[#E07A5F]' : 'bg-gray-500'} mr-1.5`}></span>
+                      {route.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button className="inline-flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+                      <FileText className="w-4 h-4" />
+                      <span>Exportar PDF</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
