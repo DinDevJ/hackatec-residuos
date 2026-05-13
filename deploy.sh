@@ -1,22 +1,23 @@
 #!/bin/bash
-set -e
+echo "=== Iniciando despliegue en Producción ==="
 
-echo "==> Desplegando hackatec-residuos..."
+# 1. Traer los últimos cambios
+cd /root/hackatec-residuos
+git pull origin main
 
-# Backend
-echo "==> Instalando dependencias backend..."
-cd backend
-pip install -r requirements.txt
-cd ..
+# 2. Actualizar Backend
+echo "-> Actualizando Backend..."
+source backend/venv/bin/activate
+pip install -r backend/requirements.txt
+sudo systemctl restart fastapi.service
 
-# Frontend
-echo "==> Build frontend..."
+# 3. Actualizar Frontend
+echo "-> Actualizando Frontend..."
 cd frontend
 npm install
 npm run build
-cd ..
+# Mover los archivos nuevos a la carpeta de Nginx
+sudo rm -rf /var/www/hackatec/*
+sudo cp -r dist/* /var/www/hackatec/
 
-echo "==> Reiniciando servicios..."
-sudo systemctl restart fastapi
-
-echo "==> Listo."
+echo "=== Despliegue finalizado con éxito! ==="
