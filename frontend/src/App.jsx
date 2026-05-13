@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import {
-  Leaf, LayoutDashboard, Map, Cpu, Truck, Settings, HelpCircle,
+  LayoutDashboard, Map, Cpu, Truck, Settings, HelpCircle,
   Weight, Fuel, AlertTriangle, Activity, Brain, FileText, CheckCircle2,
   Users, Flame, BarChart3, Plus, Info, Star, MessageSquare, MapPin,
   ChevronDown, Calendar, RotateCcw, Sparkles, Send, RefreshCw
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import logoImg from './ECOTRACK.png';
+import Sidebar from './components/Sidebar';
 
 // --- MOCK DATA ---
 const chartData = [
@@ -22,67 +24,6 @@ const fleetData = [
 ];
 
 // --- COMPONENTS ---
-
-function Sidebar({ currentView, setCurrentView }) {
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'smart-map', label: 'Smart Map', icon: Map },
-    { id: 'ai-routing', label: 'AI Routing', icon: Cpu },
-    { id: 'fleet', label: 'Fleet Manager', icon: Truck },
-  ];
-
-  return (
-    <aside className="w-64 bg-[#F9F3F2] flex flex-col justify-between h-full border-r border-gray-100 shrink-0">
-      <div>
-        <div className="p-6 flex items-center space-x-3">
-          <div className="bg-[#7B907B] p-2 rounded-lg shadow-sm">
-            <Leaf className="text-white w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">EcoTrack</h1>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Logistics Intelligence</p>
-          </div>
-        </div>
-        <nav className="mt-6 px-4 space-y-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setCurrentView(item.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${currentView === item.id
-                ? 'bg-[#7B907B] text-white shadow-sm'
-                : 'text-gray-600 hover:bg-white hover:shadow-sm'
-                }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-      <div className="p-4">
-        <div className="space-y-2 mb-6 px-4">
-          <button className="w-full flex items-center space-x-3 py-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <Settings className="w-5 h-5" />
-            <span className="font-medium">Settings</span>
-          </button>
-          <button className="w-full flex items-center space-x-3 py-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <HelpCircle className="w-5 h-5" />
-            <span className="font-medium">Support</span>
-          </button>
-        </div>
-
-        {/* User Profile at absolute bottom */}
-        <div className="flex items-center space-x-3 p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
-          <img src="https://i.pravatar.cc/150?img=11" alt="User Avatar" className="w-10 h-10 rounded-full" />
-          <div className="text-left">
-            <p className="text-sm font-semibold text-gray-900">Admin</p>
-            <p className="text-xs text-gray-500">Logistics Manager</p>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-}
 
 function DashboardView() {
   return (
