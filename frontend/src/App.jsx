@@ -11,7 +11,7 @@ export default function App() {
   return (
     <div className="flex h-screen bg-[#FCFAFA] font-sans text-gray-800 overflow-hidden">
       <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
-      {currentView === 'dashboard' && <DashboardView />}
+      {currentView === 'dashboard' && <DashboardView setCurrentView={setCurrentView} />}
       {currentView === 'smart-map' && <SmartMapView />}
       {currentView === 'fleet' && <FleetManagerView />}
       {currentView === 'ai-routing' && <AIRoutingView />}

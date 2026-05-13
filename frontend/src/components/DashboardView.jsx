@@ -3,14 +3,24 @@ import { Weight, Fuel, Truck, CheckCircle2, Brain, Activity, FileText } from 'lu
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getDashboardSummary } from '../api/client';
 
-export default function DashboardView() {
+export default function DashboardView({ setCurrentView }) {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    getDashboardSummary().then(res => setData(res.data)).catch(console.error);
+    getDashboardSummary()
+      .then(res => {
+        console.log("Dashboard Data:", res.data);
+        setData(res.data);
+      })
+      .catch(err => {
+        console.error("Dashboard Error:", err);
+        setError(err.message);
+      });
   }, []);
 
-  if (!data) return <div className="flex-1 flex justify-center items-center">Cargando...</div>;
+  if (error) return <div className="flex-1 flex justify-center items-center text-red-500">Error: {error}</div>;
+  if (!data) return <div className="flex-1 flex flex-col justify-center items-center"><div>Cargando...</div><div className="text-xs text-gray-400 mt-2">Pidiendo datos al backend...</div></div>;
 
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-[#FCFAFA]">
@@ -117,7 +127,10 @@ export default function DashboardView() {
             ))}
           </div>
 
-          <button className="w-full mt-6 bg-[#7B907B] hover:bg-[#6a7d6a] text-white py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors">
+          <button 
+            onClick={() => setCurrentView('ai-routing')}
+            className="w-full mt-6 bg-[#7B907B] hover:bg-[#6a7d6a] text-white py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors"
+          >
             <Activity className="w-5 h-5" />
             <span className="font-medium">Optimizar Ruta</span>
           </button>
@@ -128,7 +141,12 @@ export default function DashboardView() {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-50 overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-50 flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-900">Asignaciones de Rutas Activas</h3>
-          <button className="text-sm font-medium text-[#7B907B] hover:text-[#6a7d6a]">Ver Todo</button>
+          <button 
+            onClick={() => setCurrentView('fleet')}
+            className="text-sm font-medium text-[#7B907B] hover:text-[#6a7d6a]"
+          >
+            Ver Todo
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -154,7 +172,10 @@ export default function DashboardView() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="inline-flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+                    <button 
+                      onClick={() => window.open(`/api/routes/${route.truck_id}/export-pdf`, '_blank')}
+                      className="inline-flex items-center space-x-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
                       <FileText className="w-4 h-4" />
                       <span>Exportar PDF</span>
                     </button>

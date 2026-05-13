@@ -9,12 +9,12 @@ export default function Sidebar({ currentView, setCurrentView }) {
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
     { id: 'smart-map', label: 'Mapa Inteligente', icon: MapIcon },
     { id: 'ai-routing', label: 'Rutas IA', icon: Cpu },
-    { id: 'fleet', label: 'Gestión Flotilla', icon: Truck },
+    { id: 'fleet', label: 'Gestión de Operadores', icon: Truck },
   ];
 
   return (
     <aside className="w-[280px] bg-[#f5f3f0] h-screen flex flex-col border-r border-[#e4e2df] px-4 py-6 shrink-0 z-20">
-      
+
       {/* 1. Header & Logo */}
       <div className="flex items-center space-x-3 mb-8 px-2">
         <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
@@ -32,11 +32,10 @@ export default function Sidebar({ currentView, setCurrentView }) {
           <button
             key={item.id}
             onClick={() => setCurrentView(item.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
-              currentView === item.id
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${currentView === item.id
                 ? 'bg-[#d2e9d0] text-[#0d1f11] font-bold'
                 : 'text-[#434842] font-medium hover:bg-[#e4e2df] hover:text-[#1b1c1a]'
-            }`}
+              }`}
           >
             <item.icon className={`w-5 h-5 ${currentView === item.id ? 'text-[#0d1f11]' : 'text-[#434842]'}`} />
             <span>{item.label}</span>
@@ -47,19 +46,19 @@ export default function Sidebar({ currentView, setCurrentView }) {
       {/* 3. Bottom Section (User Profile & Settings) */}
       <div className="mt-auto">
         <div className="flex items-center p-3 bg-[#ffffff]/60 rounded-[1.25rem] cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-sm border border-[#e4e2df]/60 group">
-          
+
           {/* Avatar with Online Indicator */}
           <div className="relative flex-shrink-0">
             <img src="https://i.pravatar.cc/150?img=5" alt="User Avatar" className="w-11 h-11 rounded-full object-cover shadow-sm ring-2 ring-white" />
             <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-[#4d614e] border-2 border-white rounded-full"></div>
           </div>
-          
+
           {/* User Info */}
           <div className="flex-1 text-left ml-3 overflow-hidden">
             <p className="text-sm font-extrabold text-[#1b1c1a] truncate">Katia Aguilar</p>
             <p className="text-[10px] text-[#4d614e] font-bold uppercase tracking-wider mt-0.5 truncate">Logistics Mgr</p>
           </div>
-          
+
           {/* Action Icons */}
           <div className="flex items-center space-x-0.5 text-[#434842]">
             <button className="p-2 hover:text-[#1b1c1a] hover:bg-[#f5f3f0] rounded-xl transition-colors group-hover:opacity-100 opacity-70">
