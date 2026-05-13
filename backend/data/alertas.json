@@ -1,0 +1,66 @@
+[
+    {
+        "id": "ALT-001",
+        "type": "traffic",
+        "title": "Tráfico severo en Zona Centro",
+        "description": "Retraso estimado de 25 mins. IA recalculando Ruta Beta.",
+        "severity": "high",
+        "timestamp": "2026-05-12T20:15:00Z"
+    },
+    {
+        "id": "ALT-002",
+        "type": "capacity",
+        "title": "Zona Norte al 85% de capacidad",
+        "description": "Se sugiere adelantar la salida del TRK-04.",
+        "severity": "medium",
+        "timestamp": "2026-05-12T19:30:00Z"
+    },
+    {
+        "id": "ALT-003",
+        "type": "maintenance",
+        "title": "Mantenimiento preventivo",
+        "description": "El TRK-07 requiere cambio de balatas al finalizar turno.",
+        "severity": "low",
+        "timestamp": "2026-05-12T18:00:00Z"
+    },
+    {
+        "id": "ALT-004",
+        "type": "capacity",
+        "title": "Mercado Independencia desbordado",
+        "description": "Niveles superiores al 95%. Desviando TRK-01 a la zona.",
+        "severity": "high",
+        "timestamp": "2026-05-12T20:30:00Z"
+    },
+    {
+        "id": "ALT-005",
+        "type": "traffic",
+        "title": "Accidente en Libramiento",
+        "description": "Bloqueo parcial. Impacta rutas del Sur y Poniente.",
+        "severity": "high",
+        "timestamp": "2026-05-12T20:45:00Z"
+    },
+    {
+        "id": "ALT-006",
+        "type": "maintenance",
+        "title": "Temperatura de motor alta",
+        "description": "TRK-12 reporta 105°C. Se recomienda pausa de 15 mins.",
+        "severity": "medium",
+        "timestamp": "2026-05-12T20:50:00Z"
+    },
+    {
+        "id": "ALT-007",
+        "type": "capacity",
+        "title": "Baja recolección en Zona Escolar",
+        "description": "Contenedores al 10%. Posponer ruta 2 horas.",
+        "severity": "low",
+        "timestamp": "2026-05-12T17:15:00Z"
+    },
+    {
+        "id": "ALT-008",
+        "type": "traffic",
+        "title": "Manifestación en Avenida Madero",
+        "description": "Centro bloqueado. TRK-08 y TRK-15 redirigidos.",
+        "severity": "high",
+        "timestamp": "2026-05-12T19:00:00Z"
+    }
+]

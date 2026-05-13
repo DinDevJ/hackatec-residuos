@@ -1,0 +1,90 @@
+[
+    {
+        "route_id": "alpha-402",
+        "name": "Ruta Alpha",
+        "zone": "Norte",
+        "truck": "TRK-04",
+        "status": "In Progress",
+        "est_time": "4h 15m",
+        "efficiency_saved": "12L Diesel",
+        "containers_current": 45,
+        "containers_max": 50
+    },
+    {
+        "route_id": "beta-415",
+        "name": "Ruta Beta",
+        "zone": "Centro",
+        "truck": "TRK-01",
+        "status": "Pending",
+        "est_time": "5h 30m",
+        "efficiency_saved": "Standard",
+        "containers_current": 20,
+        "containers_max": 50
+    },
+    {
+        "route_id": "gamma-410",
+        "name": "Ruta Gamma",
+        "zone": "Oriente",
+        "truck": "TRK-09",
+        "status": "Re-routed",
+        "est_time": "3h 20m",
+        "efficiency_saved": "8L Diesel",
+        "containers_current": 48,
+        "containers_max": 50
+    },
+    {
+        "route_id": "delta-422",
+        "name": "Ruta Delta",
+        "zone": "Sur",
+        "truck": "TRK-12",
+        "status": "Delayed",
+        "est_time": "6h 10m",
+        "efficiency_saved": "Standard",
+        "containers_current": 35,
+        "containers_max": 40
+    },
+    {
+        "route_id": "epsilon-430",
+        "name": "Ruta Epsilon",
+        "zone": "Poniente",
+        "truck": "TRK-15",
+        "status": "In Progress",
+        "est_time": "2h 45m",
+        "efficiency_saved": "15L Diesel",
+        "containers_current": 10,
+        "containers_max": 30
+    },
+    {
+        "route_id": "zeta-445",
+        "name": "Ruta Zeta",
+        "zone": "Centro",
+        "truck": "TRK-22",
+        "status": "Pending",
+        "est_time": "4h 00m",
+        "efficiency_saved": "Standard",
+        "containers_current": 0,
+        "containers_max": 45
+    },
+    {
+        "route_id": "eta-451",
+        "name": "Ruta Eta",
+        "zone": "Norte",
+        "truck": "TRK-18",
+        "status": "In Progress",
+        "est_time": "3h 50m",
+        "efficiency_saved": "5L Diesel",
+        "containers_current": 25,
+        "containers_max": 50
+    },
+    {
+        "route_id": "theta-460",
+        "name": "Ruta Theta",
+        "zone": "Sur",
+        "truck": "TRK-21",
+        "status": "In Progress",
+        "est_time": "5h 15m",
+        "efficiency_saved": "10L Diesel",
+        "containers_current": 40,
+        "containers_max": 60
+    }
+]

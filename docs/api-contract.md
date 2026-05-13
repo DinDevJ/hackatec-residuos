@@ -13,7 +13,7 @@ Prompt: {"prompt": "Prioriza el Mercado Independencia por tráfico" }
 Response:
 {
       "reply": "Analizando datos históricos de tráfico... Re-enrutando flotilla activa para priorizar el Mercado.",
-      "action_trigger": "refresh_routes" // Katia lee esto y recarga la tabla de rutas
+      "action_trigger": "refresh_routes" 
     }
     ```
 

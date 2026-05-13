@@ -9,8 +9,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 // TODO: Replace with REST API fetch from docs/api-contract.md
 
 const mockChatHistory = [
-  { id: 1, sender: 'user', text: 'The Mercado Independencia saturation is hitting 92%. Reroute the nearest truck immediately.' },
-  { id: 2, sender: 'ai', text: 'I\'ve identified TRK-04 is 3 minutes away at Centro Histórico. Reassigning route now to intercept critical load.' }
+  { id: 1, sender: 'user', text: 'La saturación del Mercado Independencia está llegando al 92%. Redirige el camión más cercano inmediatamente.' },
+  { id: 2, sender: 'ai', text: 'He identificado que el CAM-04 está a 3 minutos en el Centro Histórico. Reasignando ruta ahora para interceptar la carga crítica.' }
 ];
 
 const mockZoneGeoJSON = {
@@ -40,7 +40,7 @@ const mockZoneGeoJSON = {
 };
 
 const mockZoneStats = [
-  { id: 1, name: 'Centro Histórico', saturation: 85, status: 'critical', note: 'HIGH RISK - TIANGUIS DAY' },
+  { id: 1, name: 'Centro Histórico', saturation: 85, status: 'critical', note: 'ALTO RIESGO - DÍA DE TIANGUIS' },
   { id: 2, name: 'Zona Norte', saturation: 62, status: 'warning', note: '' },
   { id: 3, name: 'Colonia Las Américas', saturation: 15, status: 'safe', note: '' },
 ];
@@ -90,22 +90,22 @@ export default function SmartMapView() {
               <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 min-w-[180px]">
                 <div className="flex items-center space-x-2 text-[#8e6b73] mb-2">
                   <MapIcon className="w-4 h-4" />
-                  <span className="font-bold text-sm">Zone: Centro</span>
+                  <span className="font-bold text-sm">Zona: Centro</span>
                 </div>
                 <div className="flex justify-between text-xs text-[#1b1c1a] font-medium mb-3">
                   <span>Gen: <span className="font-bold">120 Tons</span></span>
                   <span>Sat: <span className="text-[#8e6b73] font-bold">85%</span></span>
                 </div>
                 <div className="bg-[#f5f3f0] text-[#1b1c1a] text-xs font-bold py-1.5 px-3 rounded-lg text-center">
-                  14 Bins Critical
+                  14 Contenedores Críticos
                 </div>
               </div>
             </Popup>
           </Map>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-[#fbf9f6]">
-            <p className="text-[#8e6b73] font-bold mb-2">VITE_MAPBOX_TOKEN missing</p>
-            <p className="text-sm text-[#4d614e]">Add it to your .env file to view the map.</p>
+            <p className="text-[#8e6b73] font-bold mb-2">Falta VITE_MAPBOX_TOKEN</p>
+            <p className="text-sm text-[#4d614e]">Añádelo a tu archivo .env para ver el mapa.</p>
           </div>
         )}
 
@@ -115,8 +115,8 @@ export default function SmartMapView() {
         <div className="absolute top-6 left-6 z-10 w-[340px] bg-white/90 backdrop-blur-md rounded-[1.5rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h3 className="font-extrabold text-[#1b1c1a] text-lg">Live Zone Saturation</h3>
-              <p className="text-xs text-[#4d614e] font-medium mt-1">Probability Matrix</p>
+              <h3 className="font-extrabold text-[#1b1c1a] text-lg">Saturación de Zona en Vivo</h3>
+              <p className="text-xs text-[#4d614e] font-medium mt-1">Matriz de Probabilidad</p>
             </div>
             <button className="text-gray-400 hover:text-[#1b1c1a]"><MoreVertical className="w-5 h-5" /></button>
           </div>
@@ -147,7 +147,7 @@ export default function SmartMapView() {
           </div>
 
           <div className="mt-8 flex items-center justify-between pt-4 border-t border-gray-100">
-            <span className="text-xs font-bold text-[#4d614e]">Forecast Next 12 Hours</span>
+            <span className="text-xs font-bold text-[#4d614e]">Pronóstico Próximas 12 Horas</span>
             {/* Fake Toggle Switch */}
             <div className="w-10 h-6 bg-[#4d614e] rounded-full p-1 cursor-pointer">
               <div className="w-4 h-4 bg-white rounded-full translate-x-4"></div>
@@ -159,7 +159,7 @@ export default function SmartMapView() {
         <div className="absolute top-6 right-6 z-10">
           <div className="bg-white/90 backdrop-blur-md rounded-full shadow-sm flex items-center p-2 border border-white">
             <div className="flex items-center px-4 border-r border-gray-200">
-              <input type="text" placeholder="Find Zone or Container ID..." className="bg-transparent text-sm w-48 focus:outline-none placeholder-gray-400 font-medium text-[#1b1c1a]" />
+              <input type="text" placeholder="Buscar Zona o ID de Contenedor..." className="bg-transparent text-sm w-48 focus:outline-none placeholder-gray-400 font-medium text-[#1b1c1a]" />
               <Filter className="w-4 h-4 text-[#4d614e]" />
             </div>
             <button className="p-2 mx-1 relative text-[#4d614e] hover:bg-[#f5f3f0] rounded-full transition-colors">
@@ -180,17 +180,17 @@ export default function SmartMapView() {
             <div className="px-4 border-r border-gray-100 flex items-center space-x-3">
               <div className="w-3 h-3 bg-[#4d614e] rounded-full animate-pulse"></div>
               <div>
-                <p className="text-xs font-bold text-[#1b1c1a]">AI Status: <span className="text-[#4d614e] font-medium">Processing</span></p>
-                <p className="text-[10px] text-gray-500 font-medium">248 points...</p>
+                <p className="text-xs font-bold text-[#1b1c1a]">Estado IA: <span className="text-[#4d614e] font-medium">Procesando</span></p>
+                <p className="text-[10px] text-gray-500 font-medium">248 puntos...</p>
               </div>
             </div>
             <div className="px-6 flex items-center space-x-2 text-[#8e6b73]">
               <AlertTriangle className="w-4 h-4" />
-              <span className="text-xs font-bold">3 Active Routes in High-Risk Zones</span>
+              <span className="text-xs font-bold">3 Rutas Activas en Zonas de Alto Riesgo</span>
             </div>
             <button className="bg-[#4d614e] hover:bg-[#3d4d3e] text-white text-sm font-bold px-6 py-3 rounded-xl flex items-center space-x-2 transition-colors">
               <Navigation className="w-4 h-4" />
-              <span>Generate Zonal Reroutes</span>
+              <span>Generar Redirecciones Zonales</span>
             </button>
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function SmartMapView() {
             <Brain className="w-5 h-5 text-[#4d614e]" />
             <div className="absolute top-1 right-1 w-2 h-2 bg-[#4d614e] rounded-full animate-pulse"></div>
           </div>
-          <h3 className="font-extrabold text-[#1b1c1a] text-lg tracking-tight">WasteAI Copilot</h3>
+          <h3 className="font-extrabold text-[#1b1c1a] text-lg tracking-tight">Copiloto WasteAI</h3>
         </div>
 
         <div className="flex-1 p-6 overflow-y-auto flex flex-col space-y-6">
@@ -218,7 +218,7 @@ export default function SmartMapView() {
                   <p className="mb-4">{msg.text}</p>
                   <div className="flex items-center space-x-2 text-[#4d614e] font-bold bg-white p-2.5 rounded-xl border border-[#e4e2df] shadow-sm">
                     <Navigation className="w-4 h-4" />
-                    <span>TRK-04 Rerouted</span>
+                    <span>CAM-04 Redirigido</span>
                   </div>
                 </div>
               )}
@@ -230,7 +230,7 @@ export default function SmartMapView() {
           <div className="flex items-center bg-[#fbf9f6] rounded-2xl p-1.5 border border-[#e4e2df] focus-within:border-[#4d614e]/50 focus-within:ring-2 focus-within:ring-[#4d614e]/10 transition-all shadow-inner">
             <input
               type="text"
-              placeholder="Ask AI to reroute..."
+              placeholder="Pídele a la IA que redirija..."
               className="flex-1 bg-transparent px-4 py-2 text-sm focus:outline-none text-[#1b1c1a] font-medium placeholder-gray-400"
             />
             <button className="bg-[#4d614e] hover:bg-[#3d4d3e] p-2.5 rounded-xl text-white transition-colors shadow-sm flex-shrink-0">

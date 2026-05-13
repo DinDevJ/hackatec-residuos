@@ -6,10 +6,10 @@ import logoImg from '../ECOTRACK.png';
 
 export default function Sidebar({ currentView, setCurrentView }) {
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'smart-map', label: 'Smart Map', icon: MapIcon },
-    { id: 'ai-routing', label: 'AI Routing', icon: Cpu },
-    { id: 'fleet', label: 'Fleet Manager', icon: Truck },
+    { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
+    { id: 'smart-map', label: 'Mapa Inteligente', icon: MapIcon },
+    { id: 'ai-routing', label: 'Rutas IA', icon: Cpu },
+    { id: 'fleet', label: 'Gestión Flotilla', icon: Truck },
   ];
 
   return (
